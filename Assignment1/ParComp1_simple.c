@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 
         array = (int *)malloc(sizeof(int) * size);
 
-        for (int i = 0; i < size - 1; i++) { 
+        for (int i = 0; i < size; i++) { 
             MPI_Recv(buff, 4, MPI_CHAR, 0, tag, MPI_COMM_WORLD, &status);
             array[i] = atoi(buff);
             printf("array[%d] = %d\n", i, array[i]);

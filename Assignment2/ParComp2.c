@@ -29,7 +29,7 @@ int main( int argc, char *argv[]) {
         }
         fflush(stdin);
 
-        coreSum = sum / (size);
+        coreSum = sum / size;
     }
 
     MPI_Bcast(&coreSum, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -72,9 +72,7 @@ int main( int argc, char *argv[]) {
     MPI_Scatter(array, coreSum, MPI_INT, localArray, coreSum, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&average, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&min, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-    printf("CORE: %d MIN : %d\n", rank, min);
-    fflush(stdout);
+    MPI_Bcast(&minMaxDifference, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     int localMin = 0, localMax = 0;
     for (int i = 0; i < coreSum; i++) {
@@ -124,27 +122,62 @@ int main( int argc, char *argv[]) {
 
     free(varArray);
 
-    float *newArray; 
-    float *newLocalArray;
-    newArray = (float *)malloc(sizeof(float) * sum);
-    newLocalArray = (float *)malloc(sizeof(float) * coreSum);
-
+    int *newArray; 
+    int *newLocalArray;
+    newArray = (int *)malloc(sizeof(int) * sum);
+    newLocalArray = (int *)malloc(sizeof(int) * coreSum);
     for (int i = 0; i < coreSum ; i++) {
         newLocalArray[i] = (((float) localArray[i] - min) / minMaxDifference) * 100;
-        fflush(stdout);
     }
 
-    MPI_Gather(newLocalArray, coreSum, MPI_FLOAT, newArray, coreSum, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    int localDeltaMax[2];
+    localDeltaMax[0] = newLocalArray[0];
+    localDeltaMax[1] = rank * coreSum;
+    for (int i = 1; i < coreSum ; i++)
+        if (localDeltaMax[0] < newLocalArray[i]) {
+            localDeltaMax[0] = newLocalArray[i];
+            localDeltaMax[1] = rank * coreSum + i;
+        }
+
+    int deltaMax[2];
+    MPI_Reduce(localDeltaMax, deltaMax, 1, MPI_2INT, MPI_MAXLOC, 0, MPI_COMM_WORLD);
+    MPI_Gather(newLocalArray, coreSum, MPI_INT, newArray, coreSum, MPI_INT, 0, MPI_COMM_WORLD);
     
     if (rank == 0) {
         for (int i = 0; i < sum; i++) {
-            printf("Δ[%d] = %f\n", i, newArray[i]);
+            printf("Δ[%d] = %d\n", i, newArray[i]);
             fflush(stdout);
         }
+
+        printf("Ο μεγαλύτερος αριθμός του Δ είναι το %d στην θέση %d.\n", deltaMax[0], deltaMax[1]);
     }
 
     free(newLocalArray);
 
+    int *product;
+    product = (int *)malloc(sizeof(int) * sum);
+    
+    int prefixSum = 0;
+    if (rank > 0)
+        MPI_Recv(&prefixSum, 1, MPI_INT, rank - 1, tag, MPI_COMM_WORLD, &status);
+
+    int *localProduct;
+    localProduct = (int *)malloc(sizeof(int) * sum);
+    for (int i = 0; i < coreSum; i++) {
+        prefixSum += localArray[i];
+        localProduct[i] = prefixSum;
+    }
+
+    if (rank < size - 1)
+        MPI_Send(&prefixSum, 1, MPI_INT, rank + 1, tag, MPI_COMM_WORLD);
+
+    MPI_Gather(localProduct, coreSum, MPI_INT, product, coreSum, MPI_INT, 0, MPI_COMM_WORLD);
+    if (rank == 0)
+        for (int i = 0; i < sum; i++)
+            printf("PrefixSum[%d] = %d\n", i, product[i]);
+
+    free(localProduct);
+    free(product);
     free(newArray);
     free(array);
     free(localArray);

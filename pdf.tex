@@ -1,0 +1,73 @@
+\documentclass{article}
+
+\usepackage{ucs}
+
+\usepackage[utf8x]{inputenc}
+\usepackage[greek, english]{babel}
+\usepackage{alphabeta}
+\usepackage{lmodern}
+
+\usepackage[linguistics]{forest}
+
+\usepackage{listings}
+
+\usepackage{graphicx}
+\graphicspath{./images/}
+
+\usepackage{forest}
+
+\title{Τρίτη εργαστρηριακή εργασία στο μάθημα Εισαγωγή στον Παράλληλο Υπολογισμό}
+\date{2021-01-02}
+\author{Ιάκωβος Μαστρογιαννόπουλος - cse242017102}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.95}
+
+\lstdefinestyle{mystyle} {
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\begin{document}
+    \pagenumbering{gobble}
+    \maketitle
+
+    \newpage
+    \tableofcontents
+
+    \newpage
+    \begin{abstract}
+        Αυτή είναι η τρίτη εργαστηριακή εργασία στο μάθημα Εισαγωγή στον Παραλλήλο Υπολογισμού του 5ου εξαμήνου.
+    \end{abstract}
+
+    \newpage
+    \section{Κατανόηση}
+    \paragraph{}
+    Το πρόβλημα που μας ζητείται να επιλύσουμε το παρακάτω ζητούμενο: έχουμε μια καρτησιανή τοπολογία ΜxN, και πρέπει
+    με την χρήση της C και του Framework MPI να βρούμε το καρτησιανό γινόμενο. Μας δώθηκε η επιλόγη να επιλέξουμε μεταξύ 
+    \texttt{MPI\_Send()} και \texttt{MPI\_Recv()} ή με \texttt{MPI\_Cart\_sub()} και \texttt{MPI\_Reduce()}. 
+    Επιλέχτηκε να υλοποιηθεί με το πρώτο τρόπο. Τα δεδομένα μπορεί να τα δίνει ο χρήστης τα δεδομένα από το πληκτρολόγιο ή
+    από αρχείο.
+
+    \section{Υλοποίηση}
+    \lstinputlisting[language=C]{ParComp3.c}
+
+\end{document}
